@@ -1,0 +1,96 @@
+name: Dedicated Server Launch Test
+description: Test if specified mods can launch on dedicated server environment
+inputs:
+  extra-mods:
+    description: Path to extra mods (Modrinth <id>:<version> list)
+    required: false
+    default: ""
+  mod:
+    description: Path to the mod file
+    required: true
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Make Dir
+      shell: bash
+      run: mkdir -p ./tmp/server/neoforge/mods
+
+    - name: Copy Mod
+      shell: bash
+      run: |
+        cp ${{ inputs.mod }} ./tmp/server/neoforge/mods/
+
+    - name: Install Requirement
+      shell: bash
+      run: |
+        pip install requests
+
+    - name: Download extra mods
+      if: ${{ inputs.extra-mods != '' }}
+      shell: python
+      run: |
+        import os
+        import requests
+        
+        
+        def download_mod(_mod_id, _mod_version, output_dir):
+            url = f'https://api.modrinth.com/maven/maven/modrinth/{_mod_id}/{_mod_version}-neoforge,1.21.1/{_mod_id}-{_mod_version}-neoforge,1.21.1.jar'
+            print(f'Downloading {_mod_id} {_mod_version} to {output_dir}')
+            response = requests.get(url, stream=True)
+            if not os.path.isdir(output_dir):
+                os.makedirs(output_dir)
+            with open(f'{output_dir}/{_mod_id}-{_mod_version}.jar', 'wb') as f:
+                f.write(response.content)
+                print(f'Downloaded {_mod_id} {_mod_version}')
+                f.close()
+        
+        
+        if __name__ == '__main__':
+            mods = '${{ inputs.extra-mods }}'.split(' ')
+            for mod in mods:
+                mod_id, mod_version = mod.split(':')
+                download_mod(mod_id, mod_version, './tmp/server/neoforge/mods')
+
+    - name: Download NeoForge Installer
+      shell: bash
+      run: |
+        curl -L https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.83/neoforge-21.1.83-installer.jar -o ./tmp/server/neoforge/installer.jar
+        java -jar ./tmp/server/neoforge/installer.jar --install-server ./tmp/server/neoforge
+
+    - name: Create eula.txt
+      shell: bash
+      run: |
+        echo "eula=TRUE" > ./tmp/server/neoforge/eula.txt
+
+    - name: Launch
+      shell: bash
+      run: |
+        cd ./tmp/server/neoforge
+        ./run.sh <<< "stop" &
+        for i in $(seq 60); do
+          sleep 5
+          jobs > running.txt
+          if [ ! -s running.txt ]; then
+            exit 0
+          fi
+        done
+        # Get current running jobs
+        jobs > running.txt
+        # If still have running jobs, we know we are in trouble.
+        # Call jps to get pid, and use jstack to have a trace dump.
+        # Then, kill server and force exit.
+        if [ -s running.txt ]; then
+          jps | grep BootstrapLauncher | sed -e 's/ BootstrapLauncher//g' > dslt.pid
+          jstack $(cat dslt.pid)
+          jmap -dump:live,format=b,file=heap.bin $(cat dslt.pid)
+          kill -9 $(cat dslt.pid)
+          exit -1
+        fi
+
+    - name: Check
+      shell: bash
+      run: |
+        cd ./tmp/server/neoforge
+        cat crash-reports/* || true
+        grep 'For help, type "help"' logs/*
