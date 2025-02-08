@@ -58,6 +58,11 @@ runs:
         curl -L https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.3.0/forge-1.20.1-47.3.0-installer.jar -o ./tmp/server/forge/installer.jar
         java -jar ./tmp/server/forge/installer.jar --installServer ./tmp/server/forge
 
+    - name: Create fml.toml
+      shell: bash
+      run: |
+        echo "disableConfigWatcher=true" > ./tmp/server/neoforge/config/fml.toml
+
     - name: Create eula.txt
       shell: bash
       run: |
