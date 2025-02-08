@@ -35,7 +35,7 @@ runs:
         
         
         def download_mod(_mod_id, _mod_version, output_dir):
-            url = f'https://api.modrinth.com/maven/maven/modrinth/{_mod_id}/{_mod_version}-neoforge,1.21.1/{_mod_id}-{_mod_version}-neoforge,1.21.1.jar'
+            url = f'https://api.modrinth.com/maven/maven/modrinth/{_mod_id}/{_mod_version}-neoforge,1.21.2/{_mod_id}-{_mod_version}-neoforge,1.21.2.jar'
             print(f'Downloading {_mod_id} {_mod_version} to {output_dir}')
             response = requests.get(url, stream=True)
             if not os.path.isdir(output_dir):
@@ -55,7 +55,7 @@ runs:
     - name: Download NeoForge Installer
       shell: bash
       run: |
-        curl -L https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.83/neoforge-21.1.83-installer.jar -o ./tmp/server/neoforge/installer.jar
+        curl -L https://maven.neoforged.net/releases/net/neoforged/neoforge/21.2.1-beta/neoforge-21.2.1-beta-installer.jar -o ./tmp/server/neoforge/installer.jar
         java -jar ./tmp/server/neoforge/installer.jar --install-server ./tmp/server/neoforge
 
     - name: Create fml.toml
