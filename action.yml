@@ -58,6 +58,11 @@ runs:
         curl -L https://adfoc.us/serve/sitelinks/?id=271228&url=https://maven.minecraftforge.net/net/minecraftforge/forge/1.21.1-52.0.28/forge-1.21.1-52.0.28-installer.jar -o ./tmp/server/forge/installer.jar
         java -jar ./tmp/server/forge/installer.jar --installServer ./tmp/server/forge
 
+    - name: Create fml.toml
+      shell: bash
+      run: |
+        echo "disableConfigWatcher=true" > ./tmp/server/forge/config/fml.toml
+
     - name: Create eula.txt
       shell: bash
       run: |
