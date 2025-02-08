@@ -61,6 +61,7 @@ runs:
     - name: Create fml.toml
       shell: bash
       run: |
+        mkdir -p ./tmp/server/forge/config
         echo "disableConfigWatcher=true" > ./tmp/server/neoforge/config/fml.toml
 
     - name: Create eula.txt
