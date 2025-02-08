@@ -58,6 +58,11 @@ runs:
         curl -L https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.83/neoforge-21.1.83-installer.jar -o ./tmp/server/neoforge/installer.jar
         java -jar ./tmp/server/neoforge/installer.jar --install-server ./tmp/server/neoforge
 
+    - name: Create fml.toml
+      shell: bash
+      run: |
+        echo "disableConfigWatcher=true" > ./tmp/server/neoforge/config/fml.toml
+
     - name: Create eula.txt
       shell: bash
       run: |
