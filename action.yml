@@ -35,7 +35,7 @@ runs:
         
         
         def download_mod(_mod_id, _mod_version, output_dir):
-            url = f'https://api.modrinth.com/maven/maven/modrinth/{_mod_id}/{_mod_version}-forge,1.21.3/{_mod_id}-{_mod_version}-forge,1.21.3.jar'
+            url = f'https://api.modrinth.com/maven/maven/modrinth/{_mod_id}/{_mod_version}-forge,1.21.4/{_mod_id}-{_mod_version}-forge,1.21.4.jar'
             print(f'Downloading {_mod_id} {_mod_version} to {output_dir}')
             response = requests.get(url, stream=True)
             if not os.path.isdir(output_dir):
@@ -55,7 +55,7 @@ runs:
     - name: Download Forge Installer
       shell: bash
       run: |
-        curl -L https://maven.minecraftforge.net/net/minecraftforge/forge/1.21.3-53.0.44/forge-1.21.3-53.0.44-installer.jar -o ./tmp/server/forge/installer.jar
+        curl -L https://maven.minecraftforge.net/net/minecraftforge/forge/1.21.4-54.0.35/forge-1.21.4-54.0.35-installer.jar -o ./tmp/server/forge/installer.jar
         java -jar ./tmp/server/forge/installer.jar --installServer ./tmp/server/forge
 
     - name: Create fml.toml
