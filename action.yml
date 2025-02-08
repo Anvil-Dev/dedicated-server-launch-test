@@ -35,7 +35,7 @@ runs:
         
         
         def download_mod(_mod_id, _mod_version, output_dir):
-            url = f'https://api.modrinth.com/maven/maven/modrinth/{_mod_id}/{_mod_version}-fabric,1.21.1/{_mod_id}-{_mod_version}-fabric,1.21.1.jar'
+            url = f'https://api.modrinth.com/maven/maven/modrinth/{_mod_id}/{_mod_version}-fabric,1.21.2/{_mod_id}-{_mod_version}-fabric,1.21.2.jar'
             print(f'Downloading {_mod_id} {_mod_version} to {output_dir}')
             response = requests.get(url, stream=True)
             if not os.path.isdir(output_dir):
@@ -54,7 +54,7 @@ runs:
 
     - name: Download Fabric Server Jar
       shell: bash
-      run: curl -L https://meta.fabricmc.net/v2/versions/loader/1.21.1/0.16.9/1.0.1/server/jar -o ./tmp/server/fabric/server.jar
+      run: curl -L https://meta.fabricmc.net/v2/versions/loader/1.21.2/0.16.10/1.0.1/server/jar -o ./tmp/server/fabric/server.jar
 
     - name: Create eula.txt
       shell: bash
