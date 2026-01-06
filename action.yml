@@ -53,7 +53,7 @@ runs:
         from requests import Response
         
         mod_loader = 'neoforge'
-        minecraft_version = '1.21.8'
+        minecraft_version = '1.21.9'
         root_path = f'./tmp/server/{mod_loader}'
         mod_output_dir = f'{root_path}/mods'
         modrinth_url = f'https://api.modrinth.com/maven/maven/modrinth/{{mod_id}}/{{mod_version}}-{mod_loader},{minecraft_version}/{{mod_id}}-{{mod_version}}-{mod_loader},{minecraft_version}.jar'
@@ -157,7 +157,7 @@ runs:
     - name: Download NeoForge Installer
       shell: bash
       run: |
-        curl -L https://maven.neoforged.net/releases/net/neoforged/neoforge/21.8.52/neoforge-21.8.52-installer.jar -o ./tmp/server/neoforge/installer.jar
+        curl -L https://maven.neoforged.net/releases/net/neoforged/neoforge/21.9.16-beta/neoforge-21.9.16-beta-installer.jar -o ./tmp/server/neoforge/installer.jar
         java -jar ./tmp/server/neoforge/installer.jar --install-server ./tmp/server/neoforge
 
     - name: Create fml.toml
