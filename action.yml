@@ -30,12 +30,12 @@ runs:
   steps:
     - name: Make Dir
       shell: bash
-      run: mkdir -p ./tmp/server/neoforge/mods
+      run: mkdir -p ./tmp/server/fabric/mods
 
     - name: Copy Mod
       shell: bash
       run: |
-        cp ${{ inputs.mod }} ./tmp/server/neoforge/mods/
+        cp ${{ inputs.mod }} ./tmp/server/fabric/mods/
 
     - name: Install Requirement
       shell: bash
