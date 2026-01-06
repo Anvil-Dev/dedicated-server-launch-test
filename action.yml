@@ -53,7 +53,7 @@ runs:
         from requests import Response
         
         mod_loader = 'forge'
-        minecraft_version = '1.15.2'
+        minecraft_version = '1.14.4'
         root_path = f'./tmp/server/{mod_loader}'
         mod_output_dir = f'{root_path}/mods'
         modrinth_url = f'https://api.modrinth.com/maven/maven/modrinth/{{mod_id}}/{{mod_version}}-{mod_loader},{minecraft_version}/{{mod_id}}-{{mod_version}}-{mod_loader},{minecraft_version}.jar'
@@ -157,7 +157,7 @@ runs:
     - name: Download Forge Installer
       shell: bash
       run: |
-        curl -L https://maven.minecraftforge.net/net/minecraftforge/forge/1.15.2-31.2.60/forge-1.15.2-31.2.60-installer.jar -o ./tmp/server/forge/installer.jar
+        curl -L https://maven.minecraftforge.net/net/minecraftforge/forge/1.14.4-28.2.28/forge-1.14.4-28.2.28-installer.jar -o ./tmp/server/forge/installer.jar
         java -jar ./tmp/server/forge/installer.jar --installServer ./tmp/server/forge
 
     - name: Create fml.toml
