@@ -4,11 +4,11 @@ Test if specified mods can launch on dedicated server environment
 ## Inputs
 
 * mod: Path to the main mod file (required field)
-* extra-mods: Path to extra mods (Modrinth <id>:<version> list)
-* maven-repos: The path pointing to the Maven repositories (Direct <url> list)
-* maven-mods: The path to the mod list file containing Maven coordinates (Maven <group>:<project>:<version> list)
-* url-mods: The file path pointing to a list containing mod download URLs (Direct <url> list)
-* other-files: The file path pointing to a list of URLs containing other resource files (Direct <path>@<url> list)
+* extra-mods: Path to extra mods (Modrinth `<id>:<version>` list)
+* maven-repos: The path pointing to the Maven repositories (Direct `<url>` list)
+* maven-mods: The path to the mod list file containing Maven coordinates (Maven `<group>:<project>:<version>` list)
+* url-mods: The file path pointing to a list containing mod download URLs (Direct `<url>` list)
+* other-files: The file path pointing to a list of URLs containing other resource files (Direct `<path>@<url>` list)
 
 ### Example
 ```yaml
