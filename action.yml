@@ -193,4 +193,4 @@ runs:
       run: |
         cd ./tmp/server/fabric
         cat crash-reports/* || true
-        grep 'For help, type "help"' logs/*
+        grep -d skip 'For help, type "help"' logs/*
