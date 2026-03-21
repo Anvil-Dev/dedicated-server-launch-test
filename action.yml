@@ -149,6 +149,8 @@ runs:
 
         def setup_fabric():
             download_file(fabric_launcher_url, f'{root_path}/')
+            with open(f'{root_path}/run.sh', 'w', encoding='UTF-8') as run:
+                run.write('java -jar server.jar --nogui')
 
 
         def setup_forge():
@@ -182,39 +184,6 @@ runs:
             raise Exception('Failed to run')
 
 
-        def launch_server():
-            command = ''
-            match mod_loader:
-                case 'fabric':
-                    command = 'java -jar server.jar --nogui'
-                case 'forge' | 'neoforge':
-                    command = './run.sh'
-
-            os.system(f'''
-                cd {root_path}
-                {command} <<< "stop" &
-                for i in $(seq 60); do
-                    sleep 5
-                    jobs > running.txt
-                    if [ ! -s running.txt ]; then
-                        exit 0
-                    fi
-                done
-                # Get current running jobs
-                jobs > running.txt
-                # If still have running jobs, we know we are in trouble.
-                # Call jps to get pid, and use jstack to have a trace dump.
-                # Then, kill server and force exit.
-                if [ -s running.txt ]; then
-                    jps | grep BootstrapLauncher | sed -e 's/ BootstrapLauncher//g' > dslt.pid
-                    jstack $(cat dslt.pid)
-                    jmap -dump:live,format=b,file=heap.bin $(cat dslt.pid)
-                    kill -9 $(cat dslt.pid)
-                    exit -1
-                fi
-            ''')
-
-
         if __name__ == '__main__':
             extra_mods: list[str] = '''${{ inputs.extra-mods }}'''.split()
             maven_repos: list[str] = '''${{ inputs.maven-repos }}'''.split()
@@ -239,7 +208,31 @@ runs:
                 check_dir(other_file_path)
                 run_and_retry(lambda: download_file(other_file_url, other_file_path))
             setup_server()
-            launch_server()
+
+    - name: Launch
+      shell: bash
+      run: |
+        cd ./tmp/server/${{ inputs.mod_loader }}
+        ./run.sh <<< "stop" &
+        for i in $(seq 60); do
+          sleep 5
+          jobs > running.txt
+          if [ ! -s running.txt ]; then
+            exit 0
+          fi
+        done
+        # Get current running jobs
+        jobs > running.txt
+        # If still have running jobs, we know we are in trouble.
+        # Call jps to get pid, and use jstack to have a trace dump.
+        # Then, kill server and force exit.
+        if [ -s running.txt ]; then
+          jps | grep BootstrapLauncher | sed -e 's/ BootstrapLauncher//g' > dslt.pid
+          jstack $(cat dslt.pid)
+          jmap -dump:live,format=b,file=heap.bin $(cat dslt.pid)
+          kill -9 $(cat dslt.pid)
+          exit -1
+        fi
 
     - name: Check
       shell: bash
