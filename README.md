@@ -13,10 +13,14 @@ Test if specified mods can launch on dedicated server environment
 ### Example
 ```yaml
   - name: gametest
-    uses: Anvil-Dev/dedicated-server-launch-test@1.21.1-neoforge
+    uses: Anvil-Dev/dedicated-server-launch-test@v0.1.0-universal
     continue-on-error: false
     with:
-      mod: mods/anvilcraft-neoforge-1.21.1-1.5.0.jar
+      minecraft_version: 1.21.1
+      mod_loader: neoforge
+      loader_version: 21.1.217
+      mods: |
+        mods/anvilcraft-neoforge-1.21.1-1.5.0.jar
       extra-mods: |
         create:mc1.21.1-6.0.9
         patchouli:1.21.1-92-neoforge
