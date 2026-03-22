@@ -165,6 +165,10 @@ runs:
             with open(f'{config_dir}/fml.toml', 'w', encoding='UTF-8') as fml:
                 fml.write('disableConfigWatcher=true')
 
+            if not os.path.exists(f'{root_path}/run.sh'):
+                with open(f'{root_path}/run.sh', 'w', encoding='UTF-8') as run:
+                    run.write(f'java -jar forge-{minecraft_version}-{loader_version}.jar')
+
 
         def setup_neoforge():
             download_file(neoforge_launcher_url, f'{root_path}/', 'installer.jar')
