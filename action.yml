@@ -188,28 +188,35 @@ runs:
 
 
         if __name__ == '__main__':
+            check_dir(mod_output_dir)
+
             extra_mods: list[str] = '''${{ inputs.extra-mods }}'''.split()
+            if len(extra_mods) != 0:
+                for mod in extra_mods:
+                    run_and_retry(lambda: download_modrinth_mod(mod))
+
             maven_repos: list[str] = '''${{ inputs.maven-repos }}'''.split()
             maven_repos.append(maven_central_url)
             maven_mods: list[str] = '''${{ inputs.maven-mods }}'''.split()
+            if len(maven_mods) != 0:
+                for maven_mod in maven_mods:
+                    for repo in maven_repos:
+                        if download_maven_file(repo, maven_mod):
+                            break
+
             url_mods: list[str] = '''${{ inputs.url-mods }}'''.split()
+            if len(url_mods) == 0:
+                for url_mod in url_mods:
+                    run_and_retry(lambda: download_file(url_mod, mod_output_dir))
+
             other_files: list[str] = '''${{ inputs.other-files }}'''.split()
-            if len(extra_mods) == 0 and len(maven_mods) == 0 and len(other_files) == 0:
-                exit(0)
-            check_dir(mod_output_dir)
-            for mod in extra_mods:
-                run_and_retry(lambda: download_modrinth_mod(mod))
-            for maven_mod in maven_mods:
-                for repo in maven_repos:
-                    if download_maven_file(repo, maven_mod):
-                        break
-            for url_mod in url_mods:
-                run_and_retry(lambda: download_file(url_mod, mod_output_dir))
-            for other_file in other_files:
-                other_file_path, other_file_url = other_file.split('@')
-                other_file_path = f'{root_path}/{other_file_path}'
-                check_dir(other_file_path)
-                run_and_retry(lambda: download_file(other_file_url, other_file_path))
+            if len(other_files) == 0:
+                for other_file in other_files:
+                    other_file_path, other_file_url = other_file.split('@')
+                    other_file_path = f'{root_path}/{other_file_path}'
+                    check_dir(other_file_path)
+                    run_and_retry(lambda: download_file(other_file_url, other_file_path))
+
             setup_server()
 
     - name: Launch
