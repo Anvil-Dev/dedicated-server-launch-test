@@ -151,7 +151,7 @@ runs:
 
 
         def setup_fabric():
-            download_file(fabric_launcher_url, f'{root_path}/')
+            download_file(fabric_launcher_url, f'{root_path}/', 'server.jar')
             with open(f'{root_path}/run.sh', 'w', encoding='UTF-8') as run:
                 run.write('java -jar server.jar --nogui')
 
