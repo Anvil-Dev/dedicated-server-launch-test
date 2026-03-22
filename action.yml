@@ -158,7 +158,7 @@ runs:
 
         def setup_forge():
             download_file(forge_launcher_url, f'{root_path}/', 'installer.jar')
-            os.system(f'java -jar {root_path}/installer.jar --installServer {root_path} &')
+            os.system(f'java -jar {root_path}/installer.jar --installServer {root_path}')
 
             config_dir = f'{root_path}/config'
             check_dir(config_dir)
@@ -168,7 +168,7 @@ runs:
 
         def setup_neoforge():
             download_file(neoforge_launcher_url, f'{root_path}/', 'installer.jar')
-            os.system(f'java -jar {root_path}/installer.jar --install-server {root_path} &')
+            os.system(f'java -jar {root_path}/installer.jar --install-server {root_path}')
 
             config_dir = f'{root_path}/config'
             check_dir(config_dir)
