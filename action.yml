@@ -219,6 +219,12 @@ runs:
 
             setup_server()
 
+    - name: Make run.sh Executable
+      shell: bash
+      if: ${{ runner.os != 'Windows' }}
+      run: |
+        chmod +x ./tmp/server/${{ inputs.mod_loader }}/run.sh
+
     - name: Launch
       shell: bash
       run: |
