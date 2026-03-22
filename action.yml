@@ -47,7 +47,10 @@ runs:
     - name: Copy Mod
       shell: bash
       run: |
-        cp ${{ inputs.mod }} ./tmp/server/${{ inputs.mod_loader }}/mods/
+        while IFS= read -r mod; do
+          [ -z "$mod" ] && continue
+          cp $mod ./tmp/server/${{ inputs.mod_loader }}/mods/
+        done <<< "${{ inputs.mods }}"
 
     - name: Install Requirement
       shell: bash
