@@ -38,7 +38,7 @@ inputs:
     required: false
     default: ""
   quiet-setup:
-    description: Should be quiet when setup servers (Python boolean, True/False)
+    description: Should be quiet when setup servers (boolean, true/false)
     required: false
     default: "False"
 runs:
@@ -163,7 +163,7 @@ runs:
         def setup_forge():
             download_file(forge_launcher_url, f'{root_path}/', 'installer.jar')
             install_command = f'java -jar {root_path}/installer.jar --installServer {root_path}'
-            if ${{ inputs.quiet-setup }}:
+            if '${{ inputs.quiet-setup }}' == 'true':
                 install_command += ' > /dev/null 2>&1'
             os.system(install_command)
 
@@ -180,7 +180,7 @@ runs:
         def setup_neoforge():
             download_file(neoforge_launcher_url, f'{root_path}/', 'installer.jar')
             install_command = f'java -jar {root_path}/installer.jar --installServer {root_path}'
-            if ${{ inputs.quiet-setup }}:
+            if '${{ inputs.quiet-setup }}' == 'true':
                 install_command += ' > /dev/null 2>&1'
             os.system(install_command)
 
