@@ -123,6 +123,13 @@ runs:
             return download_file(url, mod_output_dir)
 
 
+        def try_download_maven_file(repos: list[str], target: str):
+            for repo in repos:
+                if download_maven_file(repo, target):
+                    return True
+            return False
+
+
         def download_maven_file(repo: str, target: str):
             if repo.endswith('/'):
                 repo = repo[:-1]
@@ -215,17 +222,15 @@ runs:
             maven_mods: list[str] = '''${{ inputs.maven-mods }}'''.split()
             if len(maven_mods) != 0:
                 for maven_mod in maven_mods:
-                    for repo in maven_repos:
-                        if run_and_retry(lambda: download_maven_file(repo, maven_mod)):
-                            break
+                    run_and_retry(lambda: try_download_maven_file(maven_repos, maven_mod))
 
             url_mods: list[str] = '''${{ inputs.url-mods }}'''.split()
-            if len(url_mods) == 0:
+            if len(url_mods) != 0:
                 for url_mod in url_mods:
                     run_and_retry(lambda: download_file(url_mod, mod_output_dir))
 
             other_files: list[str] = '''${{ inputs.other-files }}'''.split()
-            if len(other_files) == 0:
+            if len(other_files) != 0:
                 for other_file in other_files:
                     other_file_path, other_file_url = other_file.split('@')
                     other_file_path = f'{root_path}/{other_file_path}'
