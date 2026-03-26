@@ -179,7 +179,7 @@ runs:
         mkfifo server.stdin
         trap 'exec 3>&- 2>/dev/null || true; rm -f server.stdin' EXIT
 
-        cat server.stdin | ./run.sh > server-console.log 2>&1 &
+        cat server.stdin | ./run.sh 2>&1 | tee -a server-console.log &
         server_pid=$!
         exec 3>server.stdin
         startup_ok=0
