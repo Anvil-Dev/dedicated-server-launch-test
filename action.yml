@@ -102,6 +102,7 @@ runs:
             try:
                 response = requests.get(file_url, stream=True)
                 if not response.status_code == 200:
+                    print(f'Got invalid status code {response.status_code}, failed.')
                     return False
                 if file_name == '':
                     file_name = get_file_name(file_url, response)
@@ -215,7 +216,7 @@ runs:
             if len(maven_mods) != 0:
                 for maven_mod in maven_mods:
                     for repo in maven_repos:
-                        if download_maven_file(repo, maven_mod):
+                        if run_and_retry(lambda: download_maven_file(repo, maven_mod)):
                             break
 
             url_mods: list[str] = '''${{ inputs.url-mods }}'''.split()
