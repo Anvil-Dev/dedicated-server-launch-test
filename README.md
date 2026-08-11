@@ -2,7 +2,7 @@
 
 Test if specified mods can launch on a dedicated server environment.
 
-The `26.1-fabric` branch is an exact-version compatibility wrapper around the `universal` branch. It runs the universal action with Minecraft `26.1`, Fabric loader `0.18.4`, and the `fabric` loader type.
+The `26.2-fabric` branch is an exact-version universal compatibility wrapper around the `universal` branch. It runs the universal action with Minecraft `26.2`, Fabric loader `0.19.3`, and the `fabric` loader type.
 
 ## Inputs
 
@@ -22,7 +22,7 @@ At least one of `mods` or the deprecated `mod` alias must be provided. All other
 ```yaml
 steps:
   - name: Test dedicated server launch
-    uses: Anvil-Dev/dedicated-server-launch-test@26.1-fabric
+    uses: Anvil-Dev/dedicated-server-launch-test@26.2-fabric
     with:
       mods: |
         path/to/mod.jar
