@@ -47,9 +47,9 @@ runs:
     - name: Run Universal Dedicated Server Launch Test
       uses: Anvil-Dev/dedicated-server-launch-test@universal
       with:
-        minecraft_version: "26.1"
+        minecraft_version: "26.2"
         mod_loader: "neoforge"
-        loader_version: "26.1.2.43-beta"
+        loader_version: "26.2.0.59"
         mods: ${{ inputs.mods || inputs.mod }}
         extra-mods: ${{ inputs.extra-mods }}
         maven-repos: ${{ inputs.maven-repos }}

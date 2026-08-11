@@ -2,7 +2,7 @@
 
 Test if specified mods can launch in a dedicated server environment.
 
-The `26.1-neoforge` branch is a compatibility wrapper around the `universal` branch. It pins Minecraft `26.1`, the `neoforge` mod loader, and NeoForge loader version `26.1.2.43-beta`, then forwards the supplied inputs to the universal action.
+The `26.2-neoforge` branch is a compatibility wrapper around the `universal` branch. It pins Minecraft `26.2`, the `neoforge` mod loader, and NeoForge loader version `26.2.0.59`, then forwards the supplied inputs to the universal action.
 
 ## Inputs
 
@@ -19,7 +19,7 @@ The `26.1-neoforge` branch is a compatibility wrapper around the `universal` bra
 
 ```yaml
 - name: Test dedicated server launch
-  uses: Anvil-Dev/dedicated-server-launch-test@26.1-neoforge
+  uses: Anvil-Dev/dedicated-server-launch-test@26.2-neoforge
   with:
     mods: |
       path/to/mod.jar
