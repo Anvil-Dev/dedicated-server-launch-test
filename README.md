@@ -2,7 +2,7 @@
 
 Test if specified mods can launch in a dedicated server environment.
 
-The `1.21.11-forge` branch is an exact-version compatibility wrapper around the `universal` branch. It runs the universal action with Minecraft `1.21.11`, Forge, and loader version `61.0.5`.
+The `26.1.2-forge` branch is a universal compatibility wrapper around the `universal` branch. It runs the universal action with Minecraft `26.1.2`, Forge, and loader version `64.1.0`.
 
 ## Inputs
 
@@ -21,7 +21,7 @@ Either `mods` or the deprecated `mod` alias must be provided.
 
 ```yaml
 - name: Test dedicated server launch
-  uses: Anvil-Dev/dedicated-server-launch-test@1.21.11-forge
+  uses: Anvil-Dev/dedicated-server-launch-test@26.1.2-forge
   with:
     mods: |
       path/to/mod.jar
