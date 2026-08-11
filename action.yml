@@ -1,10 +1,15 @@
 name: Dedicated Server Launch Test
 description: Test if specified mods can launch on dedicated server environment
 inputs:
-  mod:
-    description: Path to the main mod file (required field)
-    required: true
+  mods:
+    description: The paths to the mod files (one path per line)
+    required: false
     default: ""
+  mod:
+    description: Deprecated alias for mods
+    required: false
+    default: ""
+    deprecationMessage: "The 'mod' input is deprecated. Use 'mods' instead."
   extra-mods:
     description: Path to extra mods (Modrinth <id>:<version> list)
     required: false
@@ -25,252 +30,30 @@ inputs:
     description: The file path pointing to a list of URLs containing other resource files (Direct <path>@<url> list)
     required: false
     default: ""
+  quiet-setup:
+    description: Should be quiet when setup servers (boolean, true/false)
+    required: false
+    default: "False"
 runs:
   using: composite
   steps:
-    - name: Make Dir
-      shell: bash
-      run: mkdir -p ./tmp/server/neoforge/mods
-
-    - name: Copy Mod
+    - name: Validate Mod Input
+      if: ${{ inputs.mods == '' && inputs.mod == '' }}
       shell: bash
       run: |
-        cp ${{ inputs.mod }} ./tmp/server/neoforge/mods/
+        echo "::error::Either 'mods' or the deprecated 'mod' input must be provided."
+        exit 1
 
-    - name: Install Requirement
-      shell: bash
-      run: |
-        pip install requests
-
-    - name: Download extra mods
-      if: ${{ inputs.extra-mods != '' }}
-      shell: python
-      run: |
-        import os
-        from xml.etree import ElementTree
-        
-        import requests
-        from requests import Response
-        
-        mod_loader = 'neoforge'
-        minecraft_version = '26.1'
-        root_path = f'./tmp/server/{mod_loader}'
-        mod_output_dir = f'{root_path}/mods'
-        modrinth_url = f'https://api.modrinth.com/maven/maven/modrinth/{{mod_id}}/{{mod_version}}-{mod_loader},{minecraft_version}/{{mod_id}}-{{mod_version}}-{mod_loader},{minecraft_version}.jar'
-        maven_central_url = 'https://repo1.maven.org/maven2/'
-        
-        
-        def check_dir(_dir):
-            if not os.path.isdir(_dir):
-                os.makedirs(_dir)
-        
-        
-        def get_file_name(file_url: str, response: Response):
-            file_name = file_url.split('/')[-1]
-            file_name = file_name.split('?')[0]
-            if 'Content-Disposition' in response.headers:
-                for dis in response.headers['Content-Disposition'].split(' '):
-                    if not dis.startswith('filename='):
-                        continue
-                    file_name = dis[10:-1]
-            return file_name
-        
-        
-        def download_file(file_url: str, out_put_dir: str, file_name: str = ''):
-            try:
-                response = requests.get(file_url, stream=True)
-                if not response.status_code == 200:
-                    return False
-                if file_name == '':
-                    file_name = get_file_name(file_url, response)
-                print(f'Downloaded {file_name}')
-                with open(f'{out_put_dir}/{file_name}', 'wb') as f:
-                    f.write(response.content)
-                    f.close()
-                return True
-            except Exception as e:
-                print(e)
-                return False
-        
-        
-        def download_modrinth_mod(_mod: str):
-            mod_id, mod_version = _mod.split(':')
-            url = modrinth_url.replace('{mod_id}', mod_id).replace('{mod_version}', mod_version)
-            print(f'Downloading {mod_id} {mod_version} from {url} to {mod_output_dir}')
-            return download_file(url, mod_output_dir)
-        
-        
-        def download_maven_file(repo: str, target: str):
-            if repo.endswith('/'):
-                repo = repo[:-1]
-            target_split = target.split(':')
-            group = target_split[0]
-            project = target_split[1]
-            project_url = f'{repo}/{group.replace(".", "/")}/{project}'
-            if len(target_split) == 3:
-                version = target_split[2]
-            else:
-                metadata_url = f'{project_url}/maven-metadata.xml'
-                response = requests.get(metadata_url, stream=True)
-                tree = ElementTree.fromstring(response.content)
-                version = tree.find('versioning/release').text
-            target_url = f'{project_url}/{version}/{project}-{version}.jar'
-            print(f'Downloading {project} {version} to {mod_output_dir}')
-            return download_file(target_url, mod_output_dir)
-        
-        
-        def run_and_retry(runnable, retries=5):
-            for i in range(retries):
-                try:
-                    if runnable():
-                        return
-                except Exception as e:
-                    print(e)
-                    print(f'Retrying {i + 1}/{retries}')
-            raise Exception('Failed to run')
-        
-        
-        if __name__ == '__main__':
-            extra_mods: list[str] = '''${{ inputs.extra-mods }}'''.split()
-            maven_repos: list[str] = '''${{ inputs.maven-repos }}'''.split()
-            maven_repos.append(maven_central_url)
-            maven_mods: list[str] = '''${{ inputs.maven-mods }}'''.split()
-            url_mods: list[str] = '''${{ inputs.url-mods }}'''.split()
-            other_files: list[str] = '''${{ inputs.other-files }}'''.split()
-            if len(extra_mods) == 0 and len(extra_mods) == 0 and len(maven_mods) == 0 and len(other_files) == 0:
-                exit(0)
-            check_dir(mod_output_dir)
-            for mod in extra_mods:
-                run_and_retry(lambda: download_modrinth_mod(mod))
-            for maven_mod in maven_mods:
-                for repo in maven_repos:
-                    if download_maven_file(repo, maven_mod):
-                        break
-            for url_mod in url_mods:
-                run_and_retry(lambda: download_file(url_mod, mod_output_dir))
-            for other_file in other_files:
-                other_file_path, other_file_url = other_file.split('@')
-                other_file_path = f'{root_path}/{other_file_path}'
-                check_dir(other_file_path)
-                run_and_retry(lambda: download_file(other_file_url, other_file_path))
-
-    - name: Download NeoForge Installer
-      shell: bash
-      run: |
-        curl -L https://maven.neoforged.net/releases/net/neoforged/neoforge/26.1.2.43-beta/neoforge-26.1.2.43-beta-installer.jar -o ./tmp/server/neoforge/installer.jar
-        java -jar ./tmp/server/neoforge/installer.jar --install-server ./tmp/server/neoforge
-
-    - name: Create fml.toml
-      shell: bash
-      run: |
-        mkdir -p ./tmp/server/neoforge/config
-        echo "disableConfigWatcher=true" > ./tmp/server/neoforge/config/fml.toml
-
-    - name: Create eula.txt
-      shell: bash
-      run: |
-        echo "eula=TRUE" > ./tmp/server/neoforge/eula.txt
-
-    - name: Launch
-      shell: bash
-      run: |
-        cd ./tmp/server/neoforge
-        rm -f server.stdin
-        mkfifo server.stdin
-        trap 'exec 3>&- 2>/dev/null || true; rm -f server.stdin' EXIT
-
-        cat server.stdin | ./run.sh 2>&1 | tee -a server-console.log &
-        server_pid=$!
-        exec 3>server.stdin
-        startup_ok=0
-
-        # Wait up to 5 minutes for the dedicated server startup sentinel.
-        for i in $(seq 60); do
-          if [ -f logs/latest.log ] && grep -Fq 'For help, type "help"' logs/latest.log; then
-            startup_ok=1
-            break
-          fi
-
-          if ! kill -0 "$server_pid" 2>/dev/null; then
-            echo "Server exited before reaching startup sentinel"
-            tail -n 200 server-console.log || true
-            cat crash-reports/* || true
-            wait "$server_pid" || true
-            exit 1
-          fi
-
-          if ls crash-reports/* >/dev/null 2>&1; then
-            echo "Crash report detected during startup"
-            cat crash-reports/* || true
-            kill "$server_pid" 2>/dev/null || true
-            wait "$server_pid" || true
-            exit 1
-          fi
-
-          sleep 5
-        done
-
-        if [ "$startup_ok" -ne 1 ]; then
-          echo "Server did not reach startup sentinel within timeout"
-          tail -n 200 server-console.log || true
-          jps | grep BootstrapLauncher | sed -e 's/ BootstrapLauncher//g' > dslt.pid || true
-          if [ -s dslt.pid ]; then
-            jstack "$(cat dslt.pid)" || true
-            jmap -dump:live,format=b,file=heap.bin "$(cat dslt.pid)" || true
-          fi
-          kill "$server_pid" 2>/dev/null || true
-          wait "$server_pid" || true
-          exit 1
-        fi
-
-        # Shutdown must be exercised because some crashes only happen during stop.
-        echo "__DSLT_STOP_REQUESTED__" >> server-console.log
-        printf 'stop\n' >&3
-        exec 3>&-
-
-        shutdown_ok=0
-        for i in $(seq 120); do
-          if ! kill -0 "$server_pid" 2>/dev/null; then
-            shutdown_ok=1
-            break
-          fi
-          sleep 1
-        done
-
-        if [ "$shutdown_ok" -ne 1 ]; then
-          echo "Server did not stop within shutdown timeout"
-          tail -n 200 server-console.log || true
-          jps | grep BootstrapLauncher | sed -e 's/ BootstrapLauncher//g' > dslt.pid || true
-          if [ -s dslt.pid ]; then
-            jstack "$(cat dslt.pid)" || true
-          fi
-          kill -9 "$server_pid" 2>/dev/null || true
-          wait "$server_pid" || true
-          exit 1
-        fi
-
-        wait "$server_pid"
-        server_exit=$?
-        if [ "$server_exit" -ne 0 ]; then
-          echo "Server exited with non-zero code after stop: $server_exit"
-          tail -n 200 server-console.log || true
-          exit 1
-        fi
-
-        awk 'f{print} /__DSLT_STOP_REQUESTED__/{f=1}' server-console.log > shutdown-phase.log
-        if grep -Eq 'A fatal error has been detected by the Java Runtime Environment|SIGSEGV|EXCEPTION_ACCESS_VIOLATION|Exception in thread|\[FATAL\]' shutdown-phase.log; then
-          echo "Detected fatal shutdown signature in logs"
-          cat shutdown-phase.log || true
-          exit 1
-        fi
-
-    - name: Check
-      shell: bash
-      run: |
-        cd ./tmp/server/neoforge
-        cat crash-reports/* || true
-        grep -d skip 'For help, type "help"' logs/* || true
-        if ls crash-reports/* >/dev/null 2>&1; then
-          echo "Crash report generated"
-          exit 1
-        fi
+    - name: Run Universal Dedicated Server Launch Test
+      uses: Anvil-Dev/dedicated-server-launch-test@universal
+      with:
+        minecraft_version: "26.1"
+        mod_loader: "neoforge"
+        loader_version: "26.1.2.43-beta"
+        mods: ${{ inputs.mods || inputs.mod }}
+        extra-mods: ${{ inputs.extra-mods }}
+        maven-repos: ${{ inputs.maven-repos }}
+        maven-mods: ${{ inputs.maven-mods }}
+        url-mods: ${{ inputs.url-mods }}
+        other-files: ${{ inputs.other-files }}
+        quiet-setup: ${{ inputs.quiet-setup }}
