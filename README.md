@@ -6,7 +6,7 @@ Test if specified mods can launch on dedicated server environment
 * mod: Path to the main mod file (required field)
 * extra-mods: Path to extra mods (Modrinth `<id>:<version>` list)
 * maven-repos: The path pointing to the Maven repositories (Direct `<url>` list)
-* maven-mods: The path to the mod list file containing Maven coordinates (Maven `<group>:<project>:<version>` list)
+* maven-mods: The path to the mod list file containing Maven coordinates (Maven `<group>:<project>:<version>` list). The version may end with `+` as a wildcard (e.g. `0.0.1+build.+`), which resolves to the latest version whose remaining suffix is a number; the version may also be omitted entirely to use the latest release.
 * url-mods: The file path pointing to a list containing mod download URLs (Direct `<url>` list)
 * other-files: The file path pointing to a list of URLs containing other resource files (Direct `<path>@<url>` list)
 

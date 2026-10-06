@@ -131,6 +131,20 @@ runs:
             return False
 
 
+        def resolve_maven_wildcard_version(project_url: str, version: str):
+            version_prefix = version[:-1]
+            metadata_url = f'{project_url}/maven-metadata.xml'
+            response = requests.get(metadata_url, stream=True)
+            tree = ElementTree.fromstring(response.content)
+            versions = [v.text for v in tree.findall('versioning/versions/version')]
+            matched = [v for v in versions if v.startswith(version_prefix) and v[len(version_prefix):].isdigit()]
+            if not matched:
+                raise Exception(f'No version matching {version} found in {metadata_url}')
+            resolved = max(matched, key=lambda v: int(v[len(version_prefix):]))
+            print(f'Resolved wildcard version {version} to {resolved}')
+            return resolved
+
+
         def download_maven_file(repo: str, target: str):
             if repo.endswith('/'):
                 repo = repo[:-1]
@@ -145,6 +159,8 @@ runs:
                 response = requests.get(metadata_url, stream=True)
                 tree = ElementTree.fromstring(response.content)
                 version = tree.find('versioning/release').text
+            if version.endswith('+'):
+                version = resolve_maven_wildcard_version(project_url, version)
             target_url = f'{project_url}/{version}/{project}-{version}.jar'
             print(f'Downloading {project} {version} to {mod_output_dir}')
             return download_file(target_url, mod_output_dir)
